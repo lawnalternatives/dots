@@ -1,79 +1,106 @@
 #!/bin/sh
 
-set -eu
+set -eux
 
 ROOT="$(dirname "$(readlink -e "$0")")"
+DATA="$HOME/.local/share"
+CFG="$HOME/.config"
+readonly ROOT DATA CFG
 
-down() (
-	mkdir -p ~/.cache/up
-	wget -nv -NP ~/.cache/up "$1"
-	printf '%s/.cache/up/%s' ~ "${1##*/}"
+git_get() (
+  if [ ! -e "$2" ]; then
+    git clone "$1" "$2"
+  else
+    git -C "$2" pull
+  fi
 )
 
-apt() (
-	sudo apt update -y
-	sudo apt upgrade -y
-	sudo apt install -y build-essential curl zsh sqlite3 unzip
+down() (
+  mkdir -p ~/.cache/up
+  wget -nv -NP ~/.cache/up "$1"
+  printf '%s/.cache/up/%s' ~ "${1##*/}"
+)
+
+mgr() (
+  sudo apt update -y
+  sudo apt upgrade -y
+  sudo apt install -y build-essential curl zsh sqlite3 unzip pip
 )
 
 zsh() (
-	if [ ! -e ~/.config/zsh ]; then
-		ZSH=~/.config/zsh KEEP_ZSHRC=yes RUNZSH=no sh "$(down https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-		mkdir -p ~/.config/zsh/custom/plugins/
-	fi
-	histdb=.config/zsh/custom/plugins/zsh-histdb
-	if [ ! -e ~/"$histdb" ]; then
-		git clone https://github.com/larkery/zsh-histdb ~/"$histdb"
-	else
-		git -C ~/"$histdb" pull
-	fi
+  if [ ! -e "$CFG"/zsh ]; then
+    ZSH="$CFG"/zsh KEEP_ZSHRC=yes RUNZSH=no sh "$(down https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    mkdir -p "$CFG"/zsh/custom/plugins/
+  else
+    zsh -ic 'omz update'
+  fi
+  git_get https://github.com/reobin/typewritten "$CFG"/zsh/custom/typewritten
 )
 
 etc() (
-	cd "$ROOT"/etc
-	for name in *; do
-		if [ -d "$name" ]; then
-			ln -sf "$ROOT"/etc/"$name" ~/.config/"$name"
-		else
-			ln -sf "$ROOT"/etc/"$name" ~/."$name"
-		fi
-	done
+  cd "$ROOT"/etc
+  for name in *; do
+    if [ -d "$name" ]; then
+      ln -sf "$ROOT"/etc/"$name" "$CFG"
+    else
+      ln -sf "$ROOT"/etc/"$name" ~/."$name"
+    fi
+  done
 )
 
 bin() (
-	cd "$ROOT"/bin
-	for name in *; do
-		ln -sf "$ROOT"/bin/"$name" ~/.local/bin/"$name"
-	done
+  cd "$ROOT"/bin
+  for name in *; do
+    ln -sf "$ROOT"/bin/"$name" ~/.local/bin/"$name"
+  done
+)
+
+pip() (
+  pip3 -q install --user --upgrade pip neovim-remote cmake
 )
 
 pkg() (
-	rm -rf ~/.up
-	mkdir ~/.up
-	cd ~/.up
-	# neovim
-	tar --directory ~/.up --get --gzip --strip-components=1 -f \
-		"$(down https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz)"
-	# delta
-	tar --directory ~/.up/bin --get --gzip --strip-components=1 -f \
-		"$(down https://github.com/dandavison/delta/releases/download/0.15.1/delta-0.15.1-x86_64-unknown-linux-musl.tar.gz)" \
-		delta-0.15.1-x86_64-unknown-linux-musl/delta
-	# clangd
-	unzip -qq "$(down https://github.com/clangd/clangd/releases/download/15.0.6/clangd-linux-15.0.6.zip)"
-	rsync -a clangd_*/ .
-	rm -rf clangd_* LICENSE.TXT
-	# fd
-	tar --directory ~/.up/bin --get --gzip --strip-components=1 -f \
-		"$(down https://github.com/sharkdp/fd/releases/download/v8.7.0/fd-v8.7.0-x86_64-unknown-linux-musl.tar.gz)" \
-		fd-v8.7.0-x86_64-unknown-linux-musl/fd
+  rm -rf ~/.up
+  mkdir ~/.up
+  cd ~/.up
+  # neovim
+  tar --directory ~/.up --get --gzip --strip-components=1 -f \
+    "$(down https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz)"
+  # clangd
+  unzip -qq "$(down https://github.com/clangd/clangd/releases/download/15.0.6/clangd-linux-15.0.6.zip)"
+  rsync -a clangd_*/ .
+  rm -rf clangd_* LICENSE.TXT
+  # fzf
+  tar --directory ~/.up/bin --get --gzip -f \
+    "$(down https://github.com/junegunn/fzf/releases/download/0.38.0/fzf-0.38.0-linux_amd64.tar.gz)"
+  # rg
+  tar --directory ~/.up/bin --get --gzip --strip-components=1 -f \
+    "$(down https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz)" \
+    ripgrep-13.0.0-x86_64-unknown-linux-musl/rg
+  # fd
+  tar --directory ~/.up/bin --get --gzip --strip-components=1 -f \
+    "$(down https://github.com/sharkdp/fd/releases/download/v8.7.0/fd-v8.7.0-x86_64-unknown-linux-musl.tar.gz)" \
+    fd-v8.7.0-x86_64-unknown-linux-musl/fd
+  # delta
+  tar --directory ~/.up/bin --get --gzip --strip-components=1 -f \
+    "$(down https://github.com/dandavison/delta/releases/download/0.15.1/delta-0.15.1-x86_64-unknown-linux-musl.tar.gz)" \
+    delta-0.15.1-x86_64-unknown-linux-musl/delta
+  # elixir
+  unzip -qq "$(down https://github.com/elixir-lang/elixir/releases/download/v1.14.3/elixir-otp-25.zip)"
+  # lua-language-server
+  mkdir lua-language-server
+  tar --directory lua-language-server --get --gzip -f \
+    "$(down https://github.com/LuaLS/lua-language-server/releases/download/3.7.1/lua-language-server-3.7.1-linux-x64.tar.gz)"
+  ln -s "$PWD"/lua-language-server/bin/lua-language-server bin/
 )
 
 all() {
-	apt
-	zsh
-	etc
-	bin
-	pkg
+  mgr
+  zsh
+  etc
+  bin
+  pip
+  pkg
 }
 
 "$@"
