@@ -1,0 +1,68 @@
+[user]
+    email = lawnalternatives@proton.me
+    name = Lawn Alternatives
+[color]
+    ui = auto
+[rebase]
+    autoSquash = true
+[pull]
+    ff = only
+[commit]
+    verbose = true
+[core]
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
+    singleKey = true
+[delta]
+    navigate = true
+    light = false
+[merge]
+    conflictstyle = diff3
+[diff]
+    colorMoved = default
+[alias]
+    ## [s]et...
+    # [H]EAD
+    sh = switch
+    # HEAD [r]ef's head
+    sr = reset
+    # [f]ile contents
+    sf = restore
+
+    ## [v]iew...
+    # [s]tatus
+    vs = status
+    # [d]iff
+    vd = diff --no-prefix
+    # [o]bject
+    vo = show --no-prefix
+    # [l]og
+    vl = log --decorate --oneline
+    # [l]og [v]erbose
+    vlv = log --decorate
+    # [l]og [g]raph
+    vlg = log --decorate --oneline --graph --all
+
+    ## [r]ebase...
+    #
+    r = rebase
+    # [o]nto
+    ro = rebase --onto
+    # [r]ebase [a]utomatically based on HEAD ref following the convention <user>/<base>/<feature>
+    ra = "!f() { branch=$(git rev-parse --abbrev-ref HEAD); base=\"$(printf '%s' \"$branch\" | sed 's#.*/\\(.*\\)/.*#\\1#')\"; git rebase \"$@\" \"$base\" \"$branch\"; }; f"
+    # [p]ull base, then [r]ebase [a]utomatically based on HEAD ref following the convention <user>/<base>/<feature>
+    pra = "!f() { branch=$(git rev-parse --abbrev-ref HEAD); base=\"$(printf '%s' \"$branch\" | sed 's#.*/\\(.*\\)/.*#\\1#')\"; git checkout \"$base\"; git pull; git rebase \"$@\" \"$base\" \"$branch\"; }; f"
+
+    ## [c]ommit...
+    #
+    c = commit -vv
+    # [a]mend
+    ca = commit -vv --amend
+    # [e]verything
+    ce = "!f() { git add -A :/ && git commit -vv; }; f"
+    # cherry [p]ick
+    cp = cherry-pick
+
+    # Shortcut for deleting current branch and checking out the previous HEAD (git-branch doesn't support the `-` notation for `@{-1}`)
+    done = "!f() { git checkout - && git branch -D @{-1}; }; f"
