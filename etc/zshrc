@@ -3,7 +3,7 @@ export ZSH="$HOME/.config/zsh"
 ZSH_THEME=""
 
 fpath+="$HOME/.config/zsh/custom/typewritten"
-TYPEWRITTEN_PROMPT_LAYOUT="pure"
+TYPEWRITTEN_PROMPT_LAYOUT="pure_verbose"
 TYPEWRITTEN_SYMBOL="$"
 TYPEWRITTEN_DISABLE_RETURN_CODE=true
 autoload -U promptinit; promptinit
