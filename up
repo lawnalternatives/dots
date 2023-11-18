@@ -32,7 +32,7 @@ zsh() (
     ZSH="$CFG"/zsh KEEP_ZSHRC=yes RUNZSH=no sh "$(down https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
     mkdir -p "$CFG"/zsh/custom/plugins/
   else
-    zsh -ic 'omz update'
+    "$ZSH/tools/upgrade.sh"
   fi
   git_get https://github.com/reobin/typewritten "$CFG"/zsh/custom/typewritten
 )
