@@ -162,6 +162,24 @@ return {
       vim.keymap.set("n", "<c-m>", "<Plug>(YankyCycleBackward)")
     end,
   },
+  {
+    'hrsh7th/nvim-cmp',
+    dependencies = { 'hrsh7th/cmp-nvim-lsp' },
+    config = function()
+      require 'cmp'.setup {
+        mapping = require 'cmp'.mapping.preset.insert {
+          ['<C-b>'] = require 'cmp'.mapping.scroll_docs(-4),
+          ['<C-f>'] = require 'cmp'.mapping.scroll_docs(4),
+          ['<C-Space>'] = require 'cmp'.mapping.complete(),
+          ['<C-e>'] = require 'cmp'.mapping.abort(),
+          ['<CR>'] = require 'cmp'.mapping.confirm({ select = true }),
+        },
+        sources = require 'cmp'.config.sources {
+          { name = 'nvim_lsp' },
+        },
+      }
+    end
+  },
   'tpope/vim-abolish',
   'tpope/vim-fugitive',
   'tpope/vim-sleuth',
