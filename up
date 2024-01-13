@@ -49,6 +49,7 @@ etc() (
 )
 
 bin() (
+  mkdir -p ~/.local/bin
   cd "$ROOT"/bin
   for name in *; do
     ln -sf "$ROOT"/bin/"$name" ~/.local/bin/"$name"
