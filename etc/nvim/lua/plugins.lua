@@ -68,6 +68,12 @@ return {
           undo = {},
           yank_history = {},
         },
+        pickers = {
+          buffers = {
+            ignore_current_buffer = true,
+            sort_mru = true,
+          },
+        },
       }
       local builtin = require 'telescope.builtin'
       local modes = { 'n', 't', 'i' }
